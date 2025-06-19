@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>PAS Template</title>
+    <script src="https://bossanova.uk/jspreadsheet/v5/jspreadsheet.js"></script>
+    <link rel="stylesheet" href="https://bossanova.uk/jspreadsheet/v5/jspreadsheet.css" />
+    <script src="https://jsuites.net/v5/jsuites.js"></script>
+    <link rel="stylesheet" href="https://jsuites.net/v5/jsuites.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons" />
+    <style>
+        #json-output {
+            white-space: pre-wrap;
+            font-family: monospace;
+            background: #f4f4f4;
+            padding: 10px;
+            max-height: 300px;
+            overflow: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>PAS Template</h2>
+    <div id="spreadsheet" style="overflow: auto;"></div>
+    <pre id="json-output"></pre>
+
+    <script>
+        const columns = [
+            { type: 'numeric', title: 'RTU', width: 60, readOnly: true },
+            { type: 'numeric', title: 'TMS', width: 60, readOnly: true },
+            { type: 'text', title: 'Description', width: 150 },
+            { type: 'text', title: 'OSI Name', width: 120, readOnly: true },
+            { type: 'text', title: 'SCADA Key', width: 100, readOnly: true },
+            { type: 'dropdown', title: 'Ph', width: 60, source: ['A', 'B', 'C', 'N', 'AB', 'BC', 'CA', 'ABC'] },
+            { type: 'dropdown', title: 'Unit', width: 80, source: ['kV', 'kW', 'Amps', 'MW', 'MVAR'] },
+            { type: 'numeric', title: 'Full Scale Value', width: 140 },
+            { type: 'numeric', title: 'Full Scale Count', width: 140 },
+            { type: 'dropdown', title: 'Termination Point/Type', width: 180, source: ['Analog Input', 'AI', 'DI', 'DO'] },
+            { type: 'numeric', title: 'CTR', width: 80 },
+            { type: 'numeric', title: 'PTR', width: 80 },
+            { type: 'numeric', title: 'Resistor Size', width: 120 },
+            { type: 'dropdown', title: 'Xdcr. Type', width: 120, source: ['4-20mA', '0-10V', 'RTD', 'Other'] },
+            { type: 'text', title: 'Comments', width: 200 }
+        ];
+
+        const data = Array.from({ length: 500 }, (_, i) => {
+            const row = new Array(columns.length).fill('');
+            row[0] = i;      // RTU
+            row[1] = i + 1;  // TMS
+            return row;
+        });
+
+        const config = {
+            toolbar: true,
+            worksheets: [{
+                columns: columns,
+                data: data
+            }],
+            onchange: handleExport,
+            oninsertrow: handleExport,
+            oninsertcolumn: handleExport,
+            ondeleterow: handleExport,
+            ondeletecolumn: handleExport
+        };
+
+        const sheet = jspreadsheet(document.getElementById('spreadsheet'), config);
+
+        function handleExport() {
+            const ws = sheet[0];
+            const headers = config.worksheets[0].columns.map(c => c.title);
+            const raw = ws.getData(null, true);
+            const data = raw.map(r => Object.fromEntries(r.map((v, i) => [headers[i], v])));
+            document.getElementById('json-output').textContent = JSON.stringify(data, null, 2);
+        }
+    </script>
+
+</body>
+
+</html>
